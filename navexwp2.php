@@ -1022,6 +1022,19 @@ function navexwp_init() {
 
 add_action('plugins_loaded', 'navexwp_init');
 
+// GitHub Updater
+require_once('plugin-update-checker/plugin-update-checker.php');
+use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
+
+$myUpdateChecker = PucFactory::buildUpdateChecker(
+    'https://github.com/ABCDO-TN/Navexwp/',
+    __FILE__,
+    'navexwp2'
+);
+
+//Set the branch that contains the stable release.
+$myUpdateChecker->setBranch('main');
+
 
 function navexwp_activate() {
     // Create database tables if needed
