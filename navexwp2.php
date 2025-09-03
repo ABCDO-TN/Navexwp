@@ -3,7 +3,7 @@
  * Plugin Name: NavexWp2
  * Plugin URI: https://abcdo.tn/navexwp
  * Description: WooCommerce extension for delivery tracking and parcel management via API integration.
- * Version: 1.0.1
+ * Version: 1.0.2
  * Author: EROUEL & ABCDO
  * Author URI: https://abcdo.tn
  * Text Domain: navexwp2
