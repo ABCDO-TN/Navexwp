@@ -3,7 +3,7 @@
  * Plugin Name: NavexWp2
  * Plugin URI: https://abcdo.tn/navexwp
  * Description: WooCommerce extension for delivery tracking and parcel management via API integration.
- * Version: 1.0.0
+ * Version: 1.0.1
  * Author: EROUEL & ABCDO
  * Author URI: https://abcdo.tn
  * Text Domain: navexwp2
@@ -1029,7 +1029,7 @@ use YahnisElsts\PluginUpdateChecker\v5\PucFactory;
 $myUpdateChecker = PucFactory::buildUpdateChecker(
     'https://github.com/ABCDO-TN/Navexwp/',
     __FILE__,
-    'navexwp2'
+    'navexwp'
 );
 
 //Set the branch that contains the stable release.

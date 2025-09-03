@@ -1,9 +1,9 @@
-name: Create Plugin ZIP and Release
+name: Create Plugin ZIP and Release on Version Change
 
 on:
   push:
-    tags:
-      - 'v*.*.*' # This workflow runs when a new tag like v1.2.3 is pushed
+    branches:
+      - main # This workflow runs on every push to the main branch
 
 jobs:
   build:
@@ -11,39 +11,60 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # Fetches all history for all tags and branches to check for existing tags
 
-      - name: Get version from tag
+      - name: Get version from plugin file
         id: get_version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_ENV
+        run: |
+          VERSION=$(grep -oP 'Version: \K[0-9.]+' navexwp2.php)
+          echo "VERSION=$VERSION" >> $GITHUB_ENV
+          echo "TAG=v$VERSION" >> $GITHUB_ENV
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "${{ env.TAG }}" >/dev/null 2>&1; then
+            echo "Tag ${{ env.TAG }} already exists. Skipping release."
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "Tag ${{ env.TAG }} does not exist. Proceeding with release."
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
 
       - name: Create Build Directory
+        if: steps.check_tag.outputs.exists == 'false'
         run: mkdir navexwp2
 
       - name: Copy plugin files
+        if: steps.check_tag.outputs.exists == 'false'
         run: |
           rsync -rc --exclude '.git' --exclude '.github' --exclude '.wordpress-assets' --exclude 'readme.md' --exclude 'LICENSE' --exclude '.gitattributes' ./ navexwp2/
           
       - name: Create ZIP archive
-        run: zip -r navexwp2.zip navexwp2
+        if: steps.check_tag.outputs.exists == 'false'
+        run: zip -r navexwp.zip navexwp2
 
       - name: Create Release
+        if: steps.check_tag.outputs.exists == 'false'
         id: create_release
         uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref }}
+          tag_name: ${{ env.TAG }}
           release_name: Version ${{ env.VERSION }}
           draft: false
           prerelease: false
 
       - name: Upload Release Asset
-        id: upload-release-asset 
+        if: steps.check_tag.outputs.exists == 'false'
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
           upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./navexwp2.zip
-          asset_name: navexwp2.zip
+          asset_path: ./navexwp.zip
+          asset_name: navexwp.zip
           asset_content_type: application/zip
